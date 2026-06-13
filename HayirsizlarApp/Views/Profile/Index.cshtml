@@ -1,0 +1,110 @@
+@model HayirsizlarApp.Models.ChangeProfileViewModel
+@{
+    ViewData["Title"] = "Profil Ayarları";
+}
+
+<div class="auth-container" style="max-width: 600px; margin: 50px auto;">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert-success-brutalist">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="brutalist-card">
+        <h2 class="card-title">PROFİL AYARLARI</h2>
+        
+        <form asp-action="Index" method="post">
+            <div asp-validation-summary="ModelOnly" class="summary-validation-errors"></div>
+
+            <div class="form-group">
+                <label asp-for="DisplayName" class="form-label"></label>
+                <input asp-for="DisplayName" class="form-control" placeholder="Görünen Adınız" />
+                <span asp-validation-for="DisplayName" class="validation-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Profil Rengi Seç</label>
+                <input type="hidden" asp-for="AvatarColor" id="AvatarColor" />
+                
+                <div class="color-picker-container">
+                    <div class="color-option" data-color="#FFE600" style="background-color: #FFE600;"></div>
+                    <div class="color-option" data-color="#FF3E6C" style="background-color: #FF3E6C;"></div>
+                    <div class="color-option" data-color="#00E676" style="background-color: #00E676;"></div>
+                    <div class="color-option" data-color="#00B0FF" style="background-color: #00B0FF;"></div>
+                    <div class="color-option" data-color="#FF6D00" style="background-color: #FF6D00;"></div>
+                    <div class="color-option" data-color="#AA00FF" style="background-color: #AA00FF;"></div>
+                    <div class="color-option" data-color="#FF1744" style="background-color: #FF1744;"></div>
+                    <div class="color-option" data-color="#121212" style="background-color: #121212;"></div>
+                </div>
+                <span asp-validation-for="AvatarColor" class="validation-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" type="email" placeholder="E-posta Adresiniz (Örn: yazar@hayirsizlar.com)" />
+                <span asp-validation-for="Email" class="validation-error"></span>
+                <small style="display:block; margin-top:5px; font-size:0.75rem; color:#666;">* Yalnızca yeni günlük veya yorum eklendiğinde bilgilendirme maili almak için kullanılır. İsteğe bağlıdır.</small>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="MoodStatus" class="form-label"></label>
+                <input asp-for="MoodStatus" class="form-control" placeholder="Ruh halinizi kelimelerle veya emojiyle anlat..." maxlength="30" />
+                <span asp-validation-for="MoodStatus" class="validation-error"></span>
+                
+                <div class="mood-presets" style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button type="button" class="mood-preset-btn" data-mood="😎 Keyifli">😎 Keyifli</button>
+                    <button type="button" class="mood-preset-btn" data-mood="😴 Yorgun">😴 Yorgun</button>
+                    <button type="button" class="mood-preset-btn" data-mood="🔥 Hayırsız">🔥 Hayırsız</button>
+                    <button type="button" class="mood-preset-btn" data-mood="🤔 Düşünceli">🤔 Düşünceli</button>
+                    <button type="button" class="mood-preset-btn" data-mood="🎮 Oyunda">🎮 Oyunda</button>
+                    <button type="button" class="mood-preset-btn" data-mood="🍕 Aç">🍕 Aç</button>
+                </div>
+            </div>
+
+            <!-- Password Change Section (Optional) -->
+            <div style="margin-top: 30px; border-top: 3px solid black; padding-top: 20px;">
+                <h3 style="font-size: 1.15rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px;">Şifre Değiştir (İsteğe Bağlı)</h3>
+
+                <div class="form-group">
+                    <label asp-for="CurrentPassword" class="form-label"></label>
+                    <input asp-for="CurrentPassword" class="form-control" type="password" placeholder="Mevcut Şifre" autocomplete="off" />
+                    <span asp-validation-for="CurrentPassword" class="validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="NewPassword" class="form-label"></label>
+                    <input asp-for="NewPassword" class="form-control" type="password" placeholder="Yeni Şifre" autocomplete="new-password" />
+                    <span asp-validation-for="NewPassword" class="validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ConfirmNewPassword" class="form-label"></label>
+                    <input asp-for="ConfirmNewPassword" class="form-control" type="password" placeholder="Yeni Şifreyi Onayla" autocomplete="new-password" />
+                    <span asp-validation-for="ConfirmNewPassword" class="validation-error"></span>
+                </div>
+            </div>
+
+            <div style="margin-top: 25px;">
+                <button type="submit" class="nav-btn btn-yellow" style="width: 100%; font-size: 1.1rem; padding: 12px;">DEĞİŞİKLİKLERİ KAYDET →</button>
+            </div>
+        </form>
+
+        <div style="margin-top: 20px; text-align: center;">
+            <a asp-controller="Home" asp-action="Index" style="color: black; text-decoration: underline; font-weight: 700; font-size: 0.85rem; text-transform: uppercase;">← ANASAYFAYA DÖN</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll(".mood-preset-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    document.getElementById("MoodStatus").value = btn.getAttribute("data-mood");
+                });
+            });
+        });
+    </script>
+}

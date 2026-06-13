@@ -1,0 +1,95 @@
+@model HayirsizlarApp.Models.RegisterViewModel
+@{
+    ViewData["Title"] = "Abone Ol (Kayıt)";
+    int userCount = ViewBag.UserCount ?? 0;
+    bool isClosed = TempData["RegistrationClosed"] != null || userCount >= 4;
+}
+
+<div class="auth-container">
+    <div class="brutalist-card">
+        <h2 class="card-title">ABONE OL</h2>
+        
+        <div style="background-color: var(--primary-yellow); border: 2px solid black; padding: 10px; text-align: center; margin-bottom: 20px; font-weight: 800; font-size: 0.85rem; text-transform: uppercase;">
+            KAYITLI KULLANICI: @userCount / 4
+        </div>
+
+        @if (isClosed)
+        {
+            <div style="background-color: #ffd2d2; border: 3px solid #ff1744; padding: 20px; text-align: center; box-shadow: 4px 4px 0 0 #000;">
+                <p style="font-weight: 900; color: #ff1744; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 5px;">KAYITLAR KAPANDI</p>
+                <p style="font-weight: 700; font-size: 0.8rem; text-transform: uppercase; color: black;">Bu sistem kişisel bir günlük olup en fazla 4 kişiye izin vermektedir.</p>
+            </div>
+            
+            <div style="margin-top: 25px; text-align: center; border-top: 2px solid black; padding-top: 15px;">
+                <a asp-action="Login" class="nav-btn btn-black" style="display: block; text-align: center;">GİRİŞ EKRANINA DÖN</a>
+            </div>
+        }
+        else
+        {
+            <form asp-action="Register" method="post">
+                <div asp-validation-summary="ModelOnly" class="summary-validation-errors"></div>
+
+                <div class="form-group">
+                    <label asp-for="Username" class="form-label"></label>
+                    <input asp-for="Username" class="form-control" placeholder="kullanici_adi" autocomplete="off" />
+                    <span asp-validation-for="Username" class="validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="DisplayName" class="form-label"></label>
+                    <input asp-for="DisplayName" class="form-control" placeholder="Örn: Akif" autocomplete="off" />
+                    <span asp-validation-for="DisplayName" class="validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" type="password" placeholder="••••••" autocomplete="new-password" />
+                    <span asp-validation-for="Password" class="validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ConfirmPassword" class="form-label"></label>
+                    <input asp-for="ConfirmPassword" class="form-control" type="password" placeholder="••••••" autocomplete="new-password" />
+                    <span asp-validation-for="ConfirmPassword" class="validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="RegistrationCode" class="form-label"></label>
+                    <input asp-for="RegistrationCode" class="form-control" placeholder="Davetiye Kodu" />
+                    <span asp-validation-for="RegistrationCode" class="validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Profil Rengi Seç</label>
+                    <input type="hidden" asp-for="AvatarColor" id="AvatarColor" />
+                    
+                    <div class="color-picker-container">
+                        <div class="color-option" data-color="#FFE600" style="background-color: #FFE600;"></div>
+                        <div class="color-option" data-color="#FF3E6C" style="background-color: #FF3E6C;"></div>
+                        <div class="color-option" data-color="#00E676" style="background-color: #00E676;"></div>
+                        <div class="color-option" data-color="#00B0FF" style="background-color: #00B0FF;"></div>
+                        <div class="color-option" data-color="#FF6D00" style="background-color: #FF6D00;"></div>
+                        <div class="color-option" data-color="#AA00FF" style="background-color: #AA00FF;"></div>
+                        <div class="color-option" data-color="#FF1744" style="background-color: #FF1744;"></div>
+                        <div class="color-option" data-color="#121212" style="background-color: #121212;"></div>
+                    </div>
+                    <span asp-validation-for="AvatarColor" class="validation-error"></span>
+                </div>
+
+                <div style="margin-top: 25px;">
+                    <button type="submit" class="nav-btn btn-yellow" style="width: 100%; font-size: 1.1rem; padding: 12px;">KAYDI TAMAMLA & GİRİŞ YAP →</button>
+                </div>
+            </form>
+
+            <div style="margin-top: 25px; text-align: center; border-top: 2px solid black; padding-top: 15px;">
+                <p style="font-weight: 700; font-size: 0.85rem; text-transform: uppercase;">
+                    Zaten hesabın var mı? <a asp-action="Login" style="color: black; text-decoration: underline; font-weight: 900;">GİRİŞ YAP</a>
+                </p>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

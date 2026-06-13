@@ -1,0 +1,75 @@
+@inject HayirsizlarApp.Data.AppDbContext DbContext
+@{
+    var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    int unreadNotificationsCount = 0;
+    if (!string.IsNullOrEmpty(userIdString) && int.TryParse(userIdString, out int currentUserId))
+    {
+        unreadNotificationsCount = DbContext.Notifications.Count(n => n.ReceiverUserId == currentUserId && !n.IsRead);
+    }
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - HAYIRSIZLAR / LOG</title>
+    <meta name="description" content="Hayırsızlar ekibi için özel, mahrem ve retro günlük platformu." />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <!-- Site CSS -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-container">
+            <a class="brand-logo" asp-controller="Home" asp-action="Index">
+                <span class="logo-box"></span> HAYIRSIZLAR
+            </a>
+            
+            <nav class="nav-links">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-controller="Home" asp-action="Index" class="nav-btn">GÜNLÜK</a>
+                    <a asp-controller="Home" asp-action="Notifications" class="nav-btn" style="position: relative; display: inline-flex; align-items: center; gap: 5px;">
+                        BİLDİRİMLER @if (unreadNotificationsCount > 0) { <span class="notification-badge">@unreadNotificationsCount</span> }
+                    </a>
+                    <a asp-controller="Profile" asp-action="Index" class="nav-btn">PROFİL</a>
+                    
+                    <span class="user-badge" style="background-color: @User.FindFirst("AvatarColor")?.Value">
+                        @User.FindFirst("DisplayName")?.Value.ToUpper()
+                    </span>
+
+                    <form asp-controller="Auth" asp-action="Logout" method="post" class="logout-form">
+                        <button type="submit" class="nav-btn btn-black">ÇIKIŞ YAP</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Auth" asp-action="Login" class="nav-btn">GİRİŞ YAP</a>
+                    <a asp-controller="Auth" asp-action="Register" class="nav-btn btn-yellow">ABONE OL</a>
+                }
+            </nav>
+        </div>
+    </header>
+
+    <main role="main" class="main-container">
+        @RenderBody()
+    </main>
+
+    <footer class="app-footer">
+        <div class="footer-container">
+            <div>&copy; 2026 - HAYIRSIZLAR / LOG - GÜNLÜK</div>
+            <div>VERİ TABANI: MSSQL • SUNUCU: ASP.NET CORE</div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/player.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

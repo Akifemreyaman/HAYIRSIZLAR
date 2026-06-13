@@ -1,0 +1,45 @@
+@model HayirsizlarApp.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Giriş Yap";
+}
+
+<div class="auth-container">
+    <div class="brutalist-card">
+        <h2 class="card-title">GİRİŞ YAP</h2>
+        
+        <form asp-action="Login" method="post">
+            <div asp-validation-summary="ModelOnly" class="summary-validation-errors"></div>
+
+            <div class="form-group">
+                <label asp-for="Username" class="form-label"></label>
+                <input asp-for="Username" class="form-control" autocomplete="username" placeholder="kullanici_adi" />
+                <span asp-validation-for="Username" class="validation-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control" type="password" autocomplete="current-password" placeholder="••••••" />
+                <span asp-validation-for="Password" class="validation-error"></span>
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 15px;">
+                <input asp-for="RememberMe" type="checkbox" style="width: 18px; height: 18px; border: 2px solid black; accent-color: var(--primary-yellow);" />
+                <label asp-for="RememberMe" class="form-label" style="margin-bottom: 0; cursor: pointer;"></label>
+            </div>
+
+            <div style="margin-top: 25px;">
+                <button type="submit" class="nav-btn btn-yellow" style="width: 100%; font-size: 1.1rem; padding: 12px;">GİRİŞ YAP →</button>
+            </div>
+        </form>
+
+        <div style="margin-top: 25px; text-align: center; border-top: 2px solid black; padding-top: 15px;">
+            <p style="font-weight: 700; font-size: 0.85rem; text-transform: uppercase;">
+                Hesabın yok mu? <a asp-action="Register" style="color: black; text-decoration: underline; font-weight: 900;">ABONE OL</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

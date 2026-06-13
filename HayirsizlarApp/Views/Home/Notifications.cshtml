@@ -1,0 +1,63 @@
+@model List<HayirsizlarApp.Models.Notification>
+@{
+    ViewData["Title"] = "Bildirimlerim";
+}
+
+<div class="auth-container" style="max-width: 700px; margin: 50px auto;">
+    <div style="margin-bottom: 20px;">
+        <a asp-controller="Home" asp-action="Index" class="nav-btn btn-yellow" style="text-decoration: none;">&larr; GÜNLÜĞE DÖN</a>
+    </div>
+
+    <div class="brutalist-card">
+        <h2 class="card-title">BİLDİRİMLERİNİZ</h2>
+
+        @if (!Model.Any())
+        {
+            <div style="text-align: center; padding: 40px 0; font-weight: 800; text-transform: uppercase; border: 3px dashed var(--dark-black); background-color: var(--cream-bg);">
+                <p style="font-size: 2.5rem; margin-bottom: 10px;">🔔</p>
+                <p>Henüz hiç bildiriminiz yok.</p>
+            </div>
+        }
+        else
+        {
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                @foreach (var notification in Model)
+                {
+                    <div class="brutalist-card" style="margin-bottom: 0; padding: 20px; box-shadow: 4px 4px 0px 0px var(--dark-black); background-color: @(notification.IsRead ? "var(--white)" : "#FFFDE7"); border-color: @(notification.IsRead ? "var(--dark-black)" : "var(--dark-black)")">
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 10px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div class="reply-avatar" style="background-color: @(notification.SenderUser?.AvatarColor ?? "#FFE600"); width: 28px; height: 28px; font-size: 0.8rem; border-width: 2px;">
+                                    @(notification.SenderUser?.DisplayName.Substring(0, Math.Min(2, notification.SenderUser.DisplayName.Length)).ToUpper() ?? "??")
+                                </div>
+                                <span style="font-weight: 900; text-transform: uppercase; font-size: 0.95rem;">
+                                    @@@(notification.SenderUser?.Username ?? "yazar")
+                                </span>
+                            </div>
+                            <span style="font-size: 0.75rem; font-weight: 700; color: #666;">
+                                @notification.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                            </span>
+                        </div>
+
+                        <div style="font-size: 1.05rem; font-weight: 800; margin-bottom: 12px; color: var(--dark-black);">
+                            @notification.Message
+                        </div>
+
+                        @if (notification.Tweet != null)
+                        {
+                            <div style="border-left: 4px solid var(--primary-yellow); padding-left: 15px; background-color: var(--gray-bg); padding: 12px; border: 2px solid var(--dark-black); font-size: 0.95rem; font-style: italic; white-space: pre-wrap; word-break: break-word;">
+                                @if (notification.Tweet.MediaType != HayirsizlarApp.Models.MediaType.None)
+                                {
+                                    <div style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: #555; margin-bottom: 5px;">
+                                        @(notification.Tweet.MediaType == HayirsizlarApp.Models.MediaType.Image ? "📷 GÖRSEL EKİ" : "🎥 VİDEO EKİ")
+                                    </div>
+                                }
+                                @notification.Tweet.Content
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
