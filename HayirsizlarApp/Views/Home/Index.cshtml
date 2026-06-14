@@ -103,7 +103,13 @@
                                     <span class="tweet-username">@@@(tweet.User?.Username ?? "username")</span>
                                 </div>
                             </div>
-                            <span class="tweet-date">@tweet.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
+                                <span class="tweet-date">@tweet.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                                @if (tweet.IsEdited)
+                                {
+                                    <span class="tweet-edited-badge" style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; background-color: var(--primary-yellow); border: 1px solid var(--dark-black); padding: 1px 5px;" title="Düzenlenme tarihi: @tweet.EditedAt?.ToLocalTime().ToString("dd.MM.yyyy HH:mm")">(düzenlendi)</span>
+                                }
+                            </div>
                         </div>
 
                         <!-- Video / Image Retro Container -->
@@ -158,7 +164,7 @@
                         }
 
                         <!-- Text content -->
-                        <div class="tweet-content-container">
+                        <div class="tweet-content-container" id="tweet-content-container-@tweet.Id">
                             @if (!string.IsNullOrEmpty(tweet.Content))
                             {
                                 @if (tweet.Content.Length > 300)
@@ -178,6 +184,23 @@
                                 }
                             }
                         </div>
+
+                        <!-- Inline Edit form, hidden by default -->
+                        @if (tweet.UserId == Model.CurrentUser.Id)
+                        {
+                            <div class="edit-tweet-form-container" id="edit-tweet-form-container-@tweet.Id" style="display: none; margin-bottom: 20px;">
+                                <form asp-action="EditTweet" method="post">
+                                    <input type="hidden" name="id" value="@tweet.Id" />
+                                    <div class="form-group">
+                                        <textarea name="content" class="form-control" style="min-height: 100px;">@tweet.Content</textarea>
+                                    </div>
+                                    <div style="display: flex; gap: 10px;">
+                                        <button type="submit" class="nav-btn btn-yellow" style="padding: 6px 12px; font-size: 0.8rem; box-shadow: 2px 2px 0px 0px var(--dark-black);">KAYDET</button>
+                                        <button type="button" class="nav-btn btn-white" onclick="cancelEditTweet(@tweet.Id)" style="padding: 6px 12px; font-size: 0.8rem; box-shadow: 2px 2px 0px 0px var(--dark-black);">İPTAL</button>
+                                    </div>
+                                </form>
+                            </div>
+                        }
 
                         <!-- Replies Section -->
                         <div class="tweet-replies-section">
@@ -203,7 +226,13 @@
                                                         <span class="reply-username">@@@(reply.User?.Username ?? "username")</span>
                                                     </div>
                                                 </div>
-                                                <span class="reply-date">@reply.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                                                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
+                                                    <span class="reply-date">@reply.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                                                    @if (reply.IsEdited)
+                                                    {
+                                                        <span class="reply-edited-badge" style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; background-color: var(--primary-yellow); border: 1px solid var(--dark-black); padding: 1px 4px;" title="Düzenlenme tarihi: @reply.EditedAt?.ToLocalTime().ToString("dd.MM.yyyy HH:mm")">(düzenlendi)</span>
+                                                    }
+                                                </div>
                                             </div>
                                             
                                             <!-- Video / Image Retro Container for Reply -->
@@ -256,7 +285,7 @@
                                                 </div>
                                             }
 
-                                            <div class="reply-content-container">
+                                            <div class="reply-content-container" id="reply-content-container-@reply.Id">
                                                 @if (!string.IsNullOrEmpty(reply.Content))
                                                 {
                                                     @if (reply.Content.Length > 200)
@@ -277,12 +306,30 @@
                                                 }
                                             </div>
 
+                                            <!-- Inline Edit form for Reply -->
                                             @if (reply.UserId == Model.CurrentUser.Id)
                                             {
-                                                <div class="reply-actions">
+                                                <div class="edit-reply-form-container" id="edit-reply-form-container-@reply.Id" style="display: none; margin-bottom: 15px; margin-top: 10px;">
+                                                    <form asp-action="EditTweet" method="post">
+                                                        <input type="hidden" name="id" value="@reply.Id" />
+                                                        <div class="form-group" style="margin-bottom: 10px;">
+                                                            <textarea name="content" class="form-control" style="min-height: 80px; padding: 8px;">@reply.Content</textarea>
+                                                        </div>
+                                                        <div style="display: flex; gap: 10px;">
+                                                            <button type="submit" class="nav-btn btn-yellow" style="padding: 4px 8px; font-size: 0.75rem; box-shadow: 2px 2px 0px 0px var(--dark-black);">KAYDET</button>
+                                                            <button type="button" class="nav-btn btn-white" onclick="cancelEditReply(@reply.Id)" style="padding: 4px 8px; font-size: 0.75rem; box-shadow: 2px 2px 0px 0px var(--dark-black);">İPTAL</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            }
+
+                                            @if (reply.UserId == Model.CurrentUser.Id)
+                                            {
+                                                <div class="reply-actions" style="display: flex; gap: 10px; align-items: center;">
+                                                    <button class="nav-btn btn-white" onclick="startEditReply(@reply.Id)" style="font-size: 0.7rem; padding: 4px 8px; box-shadow: 2px 2px 0px 0px var(--dark-black); margin-bottom: 0;">DÜZENLE</button>
                                                     <form asp-action="DeleteTweet" method="post" onsubmit="return confirm('Bu cevabı silmek istediğinden emin misin?');">
                                                         <input type="hidden" name="id" value="@reply.Id" />
-                                                        <button type="submit" class="delete-reply-btn">SİL</button>
+                                                        <button type="submit" class="delete-reply-btn" style="margin-bottom: 0; padding: 4px 8px; font-size: 0.7rem;">SİL</button>
                                                     </form>
                                                 </div>
                                             }
@@ -321,17 +368,25 @@
                             </div>
                         </div>
 
-                        <!-- Actions / Delete button -->
-                        @if (tweet.UserId == Model.CurrentUser.Id)
-                        {
-                            <div class="tweet-footer">
-                                <div class="tweet-footer-left"></div>
-                                <form asp-action="DeleteTweet" method="post" onsubmit="return confirm('Bu günlüğü silmek istediğinden emin misin?');">
+                        <!-- Actions / Details, Edit & Delete buttons -->
+                        <div class="tweet-footer">
+                            <div class="tweet-footer-left" style="display: flex; gap: 10px;">
+                                <a asp-controller="Home" asp-action="Tweet" asp-route-id="@tweet.Id" class="nav-btn btn-white" style="font-size: 0.75rem; padding: 6px 12px; box-shadow: 2px 2px 0px 0px var(--dark-black); text-decoration: none;">
+                                    💬 CEVAPLAR (@(tweet.Replies?.Count ?? 0))
+                                </a>
+                                @if (tweet.UserId == Model.CurrentUser.Id)
+                                {
+                                    <button class="nav-btn btn-white" onclick="startEditTweet(@tweet.Id)" style="font-size: 0.75rem; padding: 6px 12px; box-shadow: 2px 2px 0px 0px var(--dark-black);">DÜZENLE</button>
+                                }
+                            </div>
+                            @if (tweet.UserId == Model.CurrentUser.Id)
+                            {
+                                <form asp-action="DeleteTweet" method="post" onsubmit="return confirm('Bu günlüğe silmek istediğinden emin misin?');">
                                     <input type="hidden" name="id" value="@tweet.Id" />
                                     <button type="submit" class="delete-tweet-btn">SİL</button>
                                 </form>
-                            </div>
-                        }
+                            }
+                        </div>
                     </div>
                 }
             }
@@ -395,6 +450,26 @@
                 wrapper.style.display = 'none';
                 btn.textContent = '💬 CEVAP YAZ';
             }
+        }
+
+        // Inline Tweet Edit
+        function startEditTweet(id) {
+            document.getElementById(`tweet-content-container-${id}`).style.display = 'none';
+            document.getElementById(`edit-tweet-form-container-${id}`).style.display = 'block';
+        }
+        function cancelEditTweet(id) {
+            document.getElementById(`tweet-content-container-${id}`).style.display = 'block';
+            document.getElementById(`edit-tweet-form-container-${id}`).style.display = 'none';
+        }
+
+        // Inline Reply Edit
+        function startEditReply(id) {
+            document.getElementById(`reply-content-container-${id}`).style.display = 'none';
+            document.getElementById(`edit-reply-form-container-${id}`).style.display = 'block';
+        }
+        function cancelEditReply(id) {
+            document.getElementById(`reply-content-container-${id}`).style.display = 'block';
+            document.getElementById(`edit-reply-form-container-${id}`).style.display = 'none';
         }
     </script>
 }

@@ -37,8 +37,16 @@ namespace HayirsizlarApp.Services
                 {
                     using (var client = new SmtpClient(server, port))
                     {
+                        client.UseDefaultCredentials = false;
                         client.Credentials = new NetworkCredential(username, password);
                         client.EnableSsl = enableSsl;
+                        
+                        if (enableSsl)
+                        {
+                            // By-pass SSL certificate validation for mail servers using self-signed or domain mismatched SSLs (common in Plesk)
+                            ServicePointManager.ServerCertificateValidationCallback = 
+                                (sender, certificate, chain, sslPolicyErrors) => true;
+                        }
 
                         var mailMessage = new MailMessage
                         {

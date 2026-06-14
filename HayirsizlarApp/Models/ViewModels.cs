@@ -104,4 +104,12 @@ namespace HayirsizlarApp.Models
         public int TotalPages { get; set; }
         public List<User> AllUsers { get; set; } = new List<User>();
     }
+
+    public class TweetDetailViewModel
+    {
+        public Tweet Tweet { get; set; } = null!;
+        public TweetPostViewModel NewReply { get; set; } = new TweetPostViewModel();
+        public User CurrentUser { get; set; } = null!;
+        public List<User> AllUsers { get; set; } = new List<User>();
+    }
 }

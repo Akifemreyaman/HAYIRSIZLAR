@@ -21,5 +21,7 @@ namespace HayirsizlarApp.Models
         public MediaType MediaType { get; set; } = MediaType.None;
         public string? MediaUrl { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public bool IsEdited { get; set; } = false;
+        public DateTime? EditedAt { get; set; }
     }
 }

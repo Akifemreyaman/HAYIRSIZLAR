@@ -141,3 +141,4 @@ C:\Users\Akif\Desktop\HAYIRSIZLAR\HayirsizlarApp\obj\Debug\net8.0\refint\Hayirsi
 C:\Users\Akif\Desktop\HAYIRSIZLAR\HayirsizlarApp\obj\Debug\net8.0\HayirsizlarApp.pdb
 C:\Users\Akif\Desktop\HAYIRSIZLAR\HayirsizlarApp\obj\Debug\net8.0\HayirsizlarApp.genruntimeconfig.cache
 C:\Users\Akif\Desktop\HAYIRSIZLAR\HayirsizlarApp\obj\Debug\net8.0\ref\HayirsizlarApp.dll
+C:\Users\Akif\Desktop\HAYIRSIZLAR\HayirsizlarApp\obj\Debug\net8.0\HayirsizlarApp.sourcelink.json

@@ -1,0 +1,442 @@
+@model HayirsizlarApp.Models.TweetDetailViewModel
+@{
+    ViewData["Title"] = "Günlük Detayı";
+}
+
+<div class="dashboard-layout" style="display: block; max-width: 900px; margin: 40px auto; padding: 0 20px;">
+    <!-- Back Navigation -->
+    <div style="margin-bottom: 30px;">
+        <a asp-action="Index" class="nav-btn btn-white" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none;">
+            <span>&larr;</span> AKIŞA GERİ DÖN
+        </a>
+    </div>
+
+    <!-- Error/Success Messages -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="validation-error" style="background-color: #ffd2d2; border: 3px solid var(--dark-black); padding: 15px; margin-bottom: 25px; box-shadow: 3px 3px 0px 0px var(--dark-black);">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- Main Parent Tweet Card -->
+    <div class="tweet-card" style="box-shadow: 8px 8px 0px 0px var(--dark-black);">
+        <!-- Header info -->
+        <div class="tweet-header">
+            <div class="tweet-author-info">
+                <div class="tweet-avatar" style="background-color: @(Model.Tweet.User?.AvatarColor ?? "#FFE600")">
+                    @(Model.Tweet.User?.DisplayName.Substring(0, Math.Min(2, Model.Tweet.User.DisplayName.Length)).ToUpper() ?? "??")
+                </div>
+                <div class="tweet-author-names">
+                    <span class="tweet-displayname">
+                        @(Model.Tweet.User?.DisplayName ?? "Bilinmeyen Yazar")
+                        @if (!string.IsNullOrEmpty(Model.Tweet.User?.MoodStatus))
+                        {
+                            <span class="user-mood-badge">💭 @Model.Tweet.User.MoodStatus</span>
+                        }
+                    </span>
+                    <span class="tweet-username">@@@(Model.Tweet.User?.Username ?? "username")</span>
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
+                <span class="tweet-date">@Model.Tweet.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                @if (Model.Tweet.IsEdited)
+                {
+                    <span class="tweet-edited-badge" style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; background-color: var(--primary-yellow); border: 1px solid var(--dark-black); padding: 1px 5px;" title="Düzenlenme tarihi: @Model.Tweet.EditedAt?.ToLocalTime().ToString("dd.MM.yyyy HH:mm")">(düzenlendi)</span>
+                }
+            </div>
+        </div>
+
+        <!-- Video / Image Retro Container -->
+        @if (Model.Tweet.MediaType != MediaType.None && !string.IsNullOrEmpty(Model.Tweet.MediaUrl))
+        {
+            <div class="retro-tv-player">
+                <div class="media-display-container">
+                    <div class="scanlines-overlay"></div>
+                    
+                    @if (Model.Tweet.MediaType == MediaType.Image)
+                    {
+                        <img src="@Model.Tweet.MediaUrl" alt="Tweet Image" />
+                    }
+                    else if (Model.Tweet.MediaType == MediaType.Video)
+                    {
+                        <video src="@Model.Tweet.MediaUrl" playsinline></video>
+                        <div class="video-play-overlay"></div>
+                    }
+                </div>
+
+                <!-- Custom Vintage Control Panel -->
+                <div class="player-dashboard">
+                    <div class="dashboard-row-upper">
+                        <span class="tv-brand-sticker">HAYIRSIZLAR-TV</span>
+                        <span>STATUS: @(Model.Tweet.MediaType == MediaType.Video ? "PLAY READY" : "STATIC")</span>
+                    </div>
+                    
+                    <div class="dashboard-row-middle">
+                        <div class="timeline-slider-container">
+                            <div class="timeline-track-bg">
+                                <div class="timeline-fill"></div>
+                            </div>
+                            <input type="range" class="timeline-input" min="0" max="100" value="0" @(Model.Tweet.MediaType == MediaType.Image ? "disabled" : "") />
+                        </div>
+                        <div class="time-counter">
+                            @(Model.Tweet.MediaType == MediaType.Video ? "00:00 / --:--" : "IMAGE VIEW")
+                        </div>
+                    </div>
+
+                    <div class="dashboard-row-lower">
+                        <div class="controls-left">
+                            <button class="player-btn btn-play-toggle" type="button" @(Model.Tweet.MediaType == MediaType.Image ? "disabled" : "")>▶</button>
+                            <button class="player-btn btn-mute-toggle" type="button" @(Model.Tweet.MediaType == MediaType.Image ? "disabled" : "")>🔊</button>
+                        </div>
+                        <div class="volume-container">
+                            <span style="font-size: 0.7rem;">VOL</span>
+                            <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="1" @(Model.Tweet.MediaType == MediaType.Image ? "disabled" : "") />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Text content -->
+        <div class="tweet-content-container" id="tweet-content-container-@Model.Tweet.Id">
+            @if (!string.IsNullOrEmpty(Model.Tweet.Content))
+            {
+                @if (Model.Tweet.Content.Length > 300)
+                {
+                    <div class="tweet-content short-content">
+                        @Html.Raw(HayirsizlarApp.Helpers.MentionHelper.HighlightMentions(Model.Tweet.Content.Substring(0, 300)))...
+                        <button class="read-more-btn" onclick="toggleReadMore(this)">Devamını Oku</button>
+                    </div>
+                    <div class="tweet-content full-content" style="display: none;">
+                        @Html.Raw(HayirsizlarApp.Helpers.MentionHelper.HighlightMentions(Model.Tweet.Content))
+                        <button class="read-less-btn" onclick="toggleReadMore(this)">Daha Az Göster</button>
+                    </div>
+                }
+                else
+                {
+                    <div class="tweet-content">@Html.Raw(HayirsizlarApp.Helpers.MentionHelper.HighlightMentions(Model.Tweet.Content))</div>
+                }
+            }
+        </div>
+
+        <!-- Inline Edit form, hidden by default -->
+        @if (Model.Tweet.UserId == Model.CurrentUser.Id)
+        {
+            <div class="edit-tweet-form-container" id="edit-tweet-form-container-@Model.Tweet.Id" style="display: none; margin-bottom: 20px;">
+                <form asp-action="EditTweet" method="post">
+                    <input type="hidden" name="id" value="@Model.Tweet.Id" />
+                    <div class="form-group">
+                        <textarea name="content" class="form-control" style="min-height: 100px;">@Model.Tweet.Content</textarea>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" class="nav-btn btn-yellow" style="padding: 6px 12px; font-size: 0.8rem; box-shadow: 2px 2px 0px 0px var(--dark-black);">KAYDET</button>
+                        <button type="button" class="nav-btn btn-white" onclick="cancelEditTweet(@Model.Tweet.Id)" style="padding: 6px 12px; font-size: 0.8rem; box-shadow: 2px 2px 0px 0px var(--dark-black);">İPTAL</button>
+                    </div>
+                </form>
+            </div>
+        }
+
+        <!-- Actions / Edit & Delete buttons -->
+        <div class="tweet-footer">
+            <div class="tweet-footer-left">
+                @if (Model.Tweet.UserId == Model.CurrentUser.Id)
+                {
+                    <button class="nav-btn btn-white" onclick="startEditTweet(@Model.Tweet.Id)" style="font-size: 0.75rem; padding: 6px 12px; box-shadow: 2px 2px 0px 0px var(--dark-black);">DÜZENLE</button>
+                }
+            </div>
+            @if (Model.Tweet.UserId == Model.CurrentUser.Id)
+            {
+                <form asp-action="DeleteTweet" method="post" onsubmit="return confirm('Bu günlüğü silmek istediğinden emin misin?');">
+                    <input type="hidden" name="id" value="@Model.Tweet.Id" />
+                    <button type="submit" class="delete-tweet-btn">SİL</button>
+                </form>
+            }
+        </div>
+    </div>
+
+    <!-- Replies Thread Section -->
+    <div style="margin-top: 40px; margin-bottom: 40px;">
+        <h3 style="font-size: 1.5rem; font-weight: 900; text-transform: uppercase; margin-bottom: 25px; border-bottom: 4px solid var(--dark-black); padding-bottom: 8px;">
+            YORUMLAR (@Model.Tweet.Replies.Count)
+        </h3>
+
+        @if (Model.Tweet.Replies == null || !Model.Tweet.Replies.Any())
+        {
+            <div style="background-color: var(--white); border: 3px dashed var(--dark-black); padding: 30px; text-align: center; font-weight: 800; text-transform: uppercase; margin-bottom: 30px;">
+                <p>Henüz yorum yapılmamış.</p>
+                <p style="font-size: 0.85rem; color: #555; margin-top: 5px;">Aşağıdaki kutudan ilk yorumu sen ekle!</p>
+            </div>
+        }
+        else
+        {
+            <div class="replies-list" style="padding-left: 0; border-left: none; display: flex; flex-direction: column; gap: 25px; margin-bottom: 40px;">
+                @foreach (var reply in Model.Tweet.Replies.OrderBy(r => r.CreatedAt))
+                {
+                    <div class="reply-item" id="reply-@reply.Id" style="background-color: var(--white); border: 3px solid var(--dark-black); padding: 20px; box-shadow: 5px 5px 0px 0px var(--dark-black); margin-bottom: 0;">
+                        <div class="reply-header">
+                            <div class="reply-author-info">
+                                <div class="reply-avatar" style="background-color: @(reply.User?.AvatarColor ?? "#FFE600")">
+                                    @(reply.User?.DisplayName.Substring(0, Math.Min(2, reply.User.DisplayName.Length)).ToUpper() ?? "??")
+                                </div>
+                                <div class="reply-author-names">
+                                    <span class="reply-displayname">
+                                        @(reply.User?.DisplayName ?? "Bilinmeyen Yazar")
+                                        @if (!string.IsNullOrEmpty(reply.User?.MoodStatus))
+                                        {
+                                            <span class="user-mood-badge" style="font-size: 0.7rem;">💭 @reply.User.MoodStatus</span>
+                                        }
+                                    </span>
+                                    <span class="reply-username">@@@(reply.User?.Username ?? "username")</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
+                                <span class="reply-date">@reply.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                                @if (reply.IsEdited)
+                                {
+                                    <span class="reply-edited-badge" style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; background-color: var(--primary-yellow); border: 1px solid var(--dark-black); padding: 1px 4px;" title="Düzenlenme tarihi: @reply.EditedAt?.ToLocalTime().ToString("dd.MM.yyyy HH:mm")">(düzenlendi)</span>
+                                }
+                            </div>
+                        </div>
+                        
+                        <!-- Video / Image Retro Container for Reply -->
+                        @if (reply.MediaType != MediaType.None && !string.IsNullOrEmpty(reply.MediaUrl))
+                        {
+                            <div class="retro-tv-player mini-player" style="margin-top: 15px; margin-bottom: 15px;">
+                                <div class="media-display-container" style="min-height: 180px;">
+                                    <div class="scanlines-overlay"></div>
+                                    
+                                    @if (reply.MediaType == MediaType.Image)
+                                    {
+                                        <img src="@reply.MediaUrl" alt="Reply Image" style="max-height: 300px;" />
+                                    }
+                                    else if (reply.MediaType == MediaType.Video)
+                                    {
+                                        <video src="@reply.MediaUrl" playsinline style="max-height: 300px;"></video>
+                                        <div class="video-play-overlay"></div>
+                                    }
+                                </div>
+
+                                <div class="player-dashboard">
+                                    <div class="dashboard-row-upper">
+                                        <span class="tv-brand-sticker">REPLY-TV</span>
+                                        <span>STATUS: @(reply.MediaType == MediaType.Video ? "PLAY READY" : "STATIC")</span>
+                                    </div>
+                                    
+                                    <div class="dashboard-row-middle">
+                                        <div class="timeline-slider-container">
+                                            <div class="timeline-track-bg">
+                                                <div class="timeline-fill"></div>
+                                            </div>
+                                            <input type="range" class="timeline-input" min="0" max="100" value="0" @(reply.MediaType == MediaType.Image ? "disabled" : "") />
+                                        </div>
+                                        <div class="time-counter">
+                                            @(reply.MediaType == MediaType.Video ? "00:00 / --:--" : "IMAGE VIEW")
+                                        </div>
+                                    </div>
+
+                                    <div class="dashboard-row-lower">
+                                        <div class="controls-left">
+                                            <button class="player-btn btn-play-toggle" type="button" @(reply.MediaType == MediaType.Image ? "disabled" : "")>▶</button>
+                                            <button class="player-btn btn-mute-toggle" type="button" @(reply.MediaType == MediaType.Image ? "disabled" : "")>🔊</button>
+                                        </div>
+                                        <div class="volume-container">
+                                            <span style="font-size: 0.7rem;">VOL</span>
+                                            <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="1" @(reply.MediaType == MediaType.Image ? "disabled" : "") />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="reply-content-container" id="reply-content-container-@reply.Id">
+                            @if (!string.IsNullOrEmpty(reply.Content))
+                            {
+                                @if (reply.Content.Length > 200)
+                                {
+                                    <div class="reply-content short-content">
+                                        @Html.Raw(HayirsizlarApp.Helpers.MentionHelper.HighlightMentions(reply.Content.Substring(0, 200)))...
+                                        <button class="read-more-btn" onclick="toggleReadMore(this)">Devamını Oku</button>
+                                    </div>
+                                    <div class="reply-content full-content" style="display: none;">
+                                        @Html.Raw(HayirsizlarApp.Helpers.MentionHelper.HighlightMentions(reply.Content))
+                                        <button class="read-less-btn" onclick="toggleReadMore(this)">Daha Az Göster</button>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="reply-content">@Html.Raw(HayirsizlarApp.Helpers.MentionHelper.HighlightMentions(reply.Content))</div>
+                                }
+                            }
+                        </div>
+
+                        <!-- Inline Edit form for Reply -->
+                        @if (reply.UserId == Model.CurrentUser.Id)
+                        {
+                            <div class="edit-reply-form-container" id="edit-reply-form-container-@reply.Id" style="display: none; margin-bottom: 15px; margin-top: 10px;">
+                                <form asp-action="EditTweet" method="post">
+                                    <input type="hidden" name="id" value="@reply.Id" />
+                                    <div class="form-group" style="margin-bottom: 10px;">
+                                        <textarea name="content" class="form-control" style="min-height: 80px; padding: 8px;">@reply.Content</textarea>
+                                    </div>
+                                    <div style="display: flex; gap: 10px;">
+                                        <button type="submit" class="nav-btn btn-yellow" style="padding: 4px 8px; font-size: 0.75rem; box-shadow: 2px 2px 0px 0px var(--dark-black);">KAYDET</button>
+                                        <button type="button" class="nav-btn btn-white" onclick="cancelEditReply(@reply.Id)" style="padding: 4px 8px; font-size: 0.75rem; box-shadow: 2px 2px 0px 0px var(--dark-black);">İPTAL</button>
+                                    </div>
+                                </form>
+                            </div>
+                        }
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 2px solid var(--dark-black); padding-top: 10px;">
+                            <div>
+                                @if (reply.UserId == Model.CurrentUser.Id)
+                                {
+                                    <button class="nav-btn btn-white" onclick="startEditReply(@reply.Id)" style="font-size: 0.7rem; padding: 4px 8px; box-shadow: 2px 2px 0px 0px var(--dark-black);">DÜZENLE</button>
+                                }
+                            </div>
+                            @if (reply.UserId == Model.CurrentUser.Id)
+                            {
+                                <form asp-action="DeleteTweet" method="post" onsubmit="return confirm('Bu cevabı silmek istediğinden emin misin?');">
+                                    <input type="hidden" name="id" value="@reply.Id" />
+                                    <button type="submit" class="delete-reply-btn" style="padding: 4px 8px; font-size: 0.7rem; box-shadow: 2px 2px 0px 0px #ff4545;">SİL</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Reply Composer Form Box -->
+    <div class="brutalist-card" style="box-shadow: 6px 6px 0px 0px var(--dark-black); background-color: var(--primary-yellow);">
+        <h2 style="font-size: 1.25rem; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border-bottom: 3px solid black; padding-bottom: 5px;">
+            BU GÜNLÜĞE YORUM YAP
+        </h2>
+        
+        <form asp-action="PostTweet" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="NewTweet.ParentTweetId" value="@Model.Tweet.Id" />
+            
+            <div class="form-group" style="margin-bottom: 15px;">
+                <textarea name="NewTweet.Content" class="form-control" style="background-color: var(--white);" placeholder="Düşüncelerini buraya ekle... Metinsiz sadece görsel/video da yükleyebilirsiniz."></textarea>
+            </div>
+
+            <!-- Custom Upload Area -->
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label for="MediaFileReply" class="custom-file-upload" style="background-color: var(--white);">
+                    📷 RESİM VEYA 🎥 VİDEO SEÇ
+                </label>
+                <input type="file" id="MediaFileReply" name="NewTweet.MediaFile" accept="image/*,video/*" style="display: none;" />
+
+                <!-- Frontend File Preview -->
+                <div class="file-preview" id="mediaPreviewContainerReply" style="background-color: var(--white);">
+                    <button type="button" class="file-preview-remove" id="removePreviewBtnReply">×</button>
+                    <img id="previewImageReply" src="" alt="Image Preview" style="display: none;" />
+                    <video id="previewVideoReply" src="" style="display: none;" muted playsinline></video>
+                </div>
+            </div>
+
+            <button type="submit" class="nav-btn btn-black" style="width: 100%; font-size: 1rem; padding: 12px; display: flex; justify-content: center; align-items: center; gap: 8px;">
+                YORUMU GÖNDER <span style="font-size: 1.1rem;">→</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        window.siteUsers = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.AllUsers.Select(u => new { username = u.Username, displayName = u.DisplayName, avatarColor = u.AvatarColor })));
+
+        function toggleReadMore(btn) {
+            const container = btn.closest('.tweet-content-container, .reply-content-container');
+            const shortContent = container.querySelector('.short-content');
+            const fullContent = container.querySelector('.full-content');
+            
+            if (shortContent.style.display === 'none') {
+                shortContent.style.display = 'block';
+                fullContent.style.display = 'none';
+            } else {
+                shortContent.style.display = 'none';
+                fullContent.style.display = 'block';
+            }
+        }
+
+        // Inline Tweet Edit
+        function startEditTweet(id) {
+            document.getElementById(`tweet-content-container-${id}`).style.display = 'none';
+            document.getElementById(`edit-tweet-form-container-${id}`).style.display = 'block';
+        }
+        function cancelEditTweet(id) {
+            document.getElementById(`tweet-content-container-${id}`).style.display = 'block';
+            document.getElementById(`edit-tweet-form-container-${id}`).style.display = 'none';
+        }
+
+        // Inline Reply Edit
+        function startEditReply(id) {
+            document.getElementById(`reply-content-container-${id}`).style.display = 'none';
+            document.getElementById(`edit-reply-form-container-${id}`).style.display = 'block';
+        }
+        function cancelEditReply(id) {
+            document.getElementById(`reply-content-container-${id}`).style.display = 'block';
+            document.getElementById(`edit-reply-form-container-${id}`).style.display = 'none';
+        }
+
+        // Media Preview for Reply Composer
+        document.addEventListener("DOMContentLoaded", () => {
+            const mediaFileInput = document.getElementById("MediaFileReply");
+            const mediaPreviewContainer = document.getElementById("mediaPreviewContainerReply");
+            const previewImage = document.getElementById("previewImageReply");
+            const previewVideo = document.getElementById("previewVideoReply");
+            const removePreviewBtn = document.getElementById("removePreviewBtnReply");
+
+            mediaFileInput.addEventListener("change", function () {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    const fileType = file.type;
+
+                    reader.onload = function (e) {
+                        mediaPreviewContainer.style.display = "block";
+                        if (fileType.startsWith("image/")) {
+                            previewImage.src = e.target.result;
+                            previewImage.style.display = "block";
+                            previewVideo.style.display = "none";
+                            previewVideo.src = "";
+                        } else if (fileType.startsWith("video/")) {
+                            previewVideo.src = e.target.result;
+                            previewVideo.style.display = "block";
+                            previewImage.style.display = "none";
+                            previewImage.src = "";
+                            previewVideo.load();
+                        }
+                    };
+
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            removePreviewBtn.addEventListener("click", function (e) {
+                e.preventDefault();
+                mediaFileInput.value = "";
+                mediaPreviewContainer.style.display = "none";
+                previewImage.src = "";
+                previewImage.style.display = "none";
+                previewVideo.src = "";
+                previewVideo.style.display = "none";
+            });
+
+            // Highlight target reply if any (anchor scroll)
+            if (window.location.hash) {
+                const targetElement = document.querySelector(window.location.hash);
+                if (targetElement) {
+                    targetElement.style.border = "4px solid var(--primary-yellow)";
+                    targetElement.style.boxShadow = "8px 8px 0px 0px var(--dark-black)";
+                    setTimeout(() => {
+                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 500);
+                }
+            }
+        });
+    </script>
+}

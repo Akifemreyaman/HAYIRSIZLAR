@@ -235,8 +235,36 @@ namespace HayirsizlarApp.Controllers
                         _context.Notifications.Add(notification);
                     }
                 }
-                await _context.SaveChangesAsync();
             }
+
+            // If it's a reply, notify the owner of the parent tweet (unless it's the owner themselves replying)
+            if (tweet.ParentTweetId.HasValue)
+            {
+                var parentTweet = await _context.Tweets.FindAsync(tweet.ParentTweetId.Value);
+                if (parentTweet != null && parentTweet.UserId != userId)
+                {
+                    var sender = await _context.Users.FindAsync(userId);
+                    var senderName = sender?.DisplayName ?? "Bir yazar";
+
+                    // Check if notification already exists to avoid duplicate
+                    var exists = await _context.Notifications.AnyAsync(n => n.TweetId == tweet.Id && n.ReceiverUserId == parentTweet.UserId);
+                    if (!exists)
+                    {
+                        var notification = new Notification
+                        {
+                            ReceiverUserId = parentTweet.UserId,
+                            SenderUserId = userId,
+                            Message = $"{senderName} günlüğünüze bir cevap yazdı.",
+                            TweetId = tweet.Id,
+                            IsRead = false,
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        _context.Notifications.Add(notification);
+                    }
+                }
+            }
+
+            await _context.SaveChangesAsync();
 
             // Trigger background email sending to other users (with 6 hours rate limit)
             _ = Task.Run(async () =>
@@ -408,6 +436,129 @@ namespace HayirsizlarApp.Controllers
             }
 
             return View(notifications);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Tweet(int id)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var currentUser = await _context.Users.FindAsync(userId);
+            if (currentUser == null)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var tweet = await _context.Tweets
+                .Include(t => t.User)
+                .Include(t => t.ParentTweet)
+                    .ThenInclude(p => p!.User)
+                .Include(t => t.Replies)
+                    .ThenInclude(r => r.User)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (tweet == null)
+            {
+                return NotFound();
+            }
+
+            // If this is a reply itself, redirect to the parent tweet detail page and highlight this reply
+            if (tweet.ParentTweetId.HasValue)
+            {
+                return RedirectToAction("Tweet", "Home", new { id = tweet.ParentTweetId.Value }, $"reply-{tweet.Id}");
+            }
+
+            var allUsers = await _context.Users.ToListAsync();
+
+            var viewModel = new TweetDetailViewModel
+            {
+                Tweet = tweet,
+                CurrentUser = currentUser,
+                AllUsers = allUsers,
+                NewReply = new TweetPostViewModel { ParentTweetId = tweet.Id }
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditTweet(int id, string content)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var tweet = await _context.Tweets.FindAsync(id);
+            if (tweet == null)
+            {
+                return NotFound();
+            }
+
+            if (tweet.UserId != userId)
+            {
+                return Forbid();
+            }
+
+            if (string.IsNullOrWhiteSpace(content) && string.IsNullOrEmpty(tweet.MediaUrl))
+            {
+                TempData["ErrorMessage"] = "Günlük veya yorum içeriği boş olamaz.";
+                var refererUrl = Request.Headers["Referer"].ToString();
+                return !string.IsNullOrEmpty(refererUrl) ? Redirect(refererUrl) : RedirectToAction("Index");
+            }
+
+            tweet.Content = content?.Trim();
+            tweet.IsEdited = true;
+            tweet.EditedAt = DateTime.UtcNow;
+
+            // Mention detection and Notification creation for new mentions in edited content
+            if (!string.IsNullOrEmpty(tweet.Content))
+            {
+                var matches = Regex.Matches(tweet.Content, @"\B@([a-zA-Z0-9_]{3,20})\b");
+                var mentionedUsernames = matches.Select(m => m.Groups[1].Value.ToLower()).Distinct().ToList();
+
+                var sender = await _context.Users.FindAsync(userId);
+                var senderName = sender?.DisplayName ?? "Bir yazar";
+
+                foreach (var username in mentionedUsernames)
+                {
+                    var receiver = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+                    if (receiver != null && receiver.Id != userId)
+                    {
+                        var exists = await _context.Notifications.AnyAsync(n => n.TweetId == tweet.Id && n.ReceiverUserId == receiver.Id);
+                        if (!exists)
+                        {
+                            var notification = new Notification
+                            {
+                                ReceiverUserId = receiver.Id,
+                                SenderUserId = userId,
+                                Message = tweet.ParentTweetId.HasValue 
+                                    ? $"{senderName} bir cevapta sizden bahsetti." 
+                                    : $"{senderName} bir günlükte sizden bahsetti.",
+                                TweetId = tweet.Id,
+                                IsRead = false,
+                                CreatedAt = DateTime.UtcNow
+                            };
+                            _context.Notifications.Add(notification);
+                        }
+                    }
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            var referer = Request.Headers["Referer"].ToString();
+            if (!string.IsNullOrEmpty(referer))
+            {
+                return Redirect(referer);
+            }
+            return RedirectToAction("Index");
         }
     }
 }
