@@ -3,11 +3,18 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection;
+using System.IO;
 using HayirsizlarApp.Data;
 using HayirsizlarApp.Models;
 using HayirsizlarApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Data Protection to persist keys to Database (prevents IIS pool recycle logouts and requires no write permissions)
+builder.Services.AddDataProtection()
+    .PersistKeysToDbContext<AppDbContext>()
+    .SetApplicationName("HayirsizlarApp");
 
 // Add database context
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

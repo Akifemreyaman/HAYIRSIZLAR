@@ -23,5 +23,7 @@ namespace HayirsizlarApp.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsEdited { get; set; } = false;
         public DateTime? EditedAt { get; set; }
+        public int? QuoteTweetId { get; set; }
+        public Tweet? QuoteTweet { get; set; }
     }
 }

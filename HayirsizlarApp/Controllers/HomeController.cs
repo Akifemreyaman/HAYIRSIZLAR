@@ -30,7 +30,7 @@ namespace HayirsizlarApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int page = 1)
+        public async Task<IActionResult> Index(int page = 1, int? quote = null)
         {
             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
@@ -44,10 +44,25 @@ namespace HayirsizlarApp.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
+            if (quote.HasValue)
+            {
+                var quoteTweet = await _context.Tweets
+                    .Include(t => t.User)
+                    .FirstOrDefaultAsync(t => t.Id == quote.Value);
+                if (quoteTweet != null)
+                {
+                    ViewBag.QuoteTweetId = quoteTweet.Id;
+                    ViewBag.QuoteAuthor = quoteTweet.User?.DisplayName ?? quoteTweet.User?.Username;
+                    ViewBag.QuoteContent = quoteTweet.Content;
+                }
+            }
+
             var query = _context.Tweets
                 .Include(t => t.User)
                 .Include(t => t.Replies)
                     .ThenInclude(r => r.User)
+                .Include(t => t.QuoteTweet)
+                    .ThenInclude(q => q!.User)
                 .Where(t => t.ParentTweetId == null)
                 .OrderByDescending(t => t.CreatedAt);
 
@@ -104,6 +119,8 @@ namespace HayirsizlarApp.Controllers
                     .Include(t => t.User)
                     .Include(t => t.Replies)
                         .ThenInclude(r => r.User)
+                    .Include(t => t.QuoteTweet)
+                        .ThenInclude(q => q!.User)
                     .Where(t => t.ParentTweetId == null)
                     .OrderByDescending(t => t.CreatedAt);
 
@@ -137,7 +154,8 @@ namespace HayirsizlarApp.Controllers
                 Content = model.Content?.Trim(),
                 CreatedAt = DateTime.UtcNow,
                 MediaType = MediaType.None,
-                ParentTweetId = model.ParentTweetId
+                ParentTweetId = model.ParentTweetId,
+                QuoteTweetId = model.QuoteTweetId
             };
 
             if (model.MediaFile != null && model.MediaFile.Length > 0)
@@ -158,6 +176,8 @@ namespace HayirsizlarApp.Controllers
                         .Include(t => t.User)
                         .Include(t => t.Replies)
                             .ThenInclude(r => r.User)
+                        .Include(t => t.QuoteTweet)
+                            .ThenInclude(q => q!.User)
                         .Where(t => t.ParentTweetId == null)
                         .OrderByDescending(t => t.CreatedAt);
 
@@ -283,17 +303,16 @@ namespace HayirsizlarApp.Controllers
                             ? (model.Content.Length > 150 ? model.Content.Substring(0, 150) + "..." : model.Content)
                             : (tweet.MediaType == MediaType.Image ? "[Bir Görsel Paylaşıldı]" : "[Bir Video Paylaşıldı]");
 
-                        var sixHoursAgo = DateTime.UtcNow.AddHours(-6);
                         var targetUsers = await dbContext.Users
-                            .Where(u => u.Id != userId && u.Email != null && u.Email != "" && 
-                                       (u.LastEmailSentAt == null || u.LastEmailSentAt < sixHoursAgo))
+                            .Where(u => u.Id != userId && u.Email != null && u.Email != "")
                             .ToListAsync();
 
                         if (targetUsers.Any())
                         {
                             var subject = "Hayırsızlar'da Yeni Güncellemeler Var!";
                             var isComment = model.ParentTweetId.HasValue;
-                            var postType = isComment ? "yeni bir yorum" : "yeni bir günlük";
+                            var isQuote = model.QuoteTweetId.HasValue;
+                            var postType = isComment ? "yeni bir yorum" : (isQuote ? "yeni bir alıntı" : "yeni bir günlük");
                             
                             foreach (var user in targetUsers)
                             {
@@ -364,6 +383,15 @@ namespace HayirsizlarApp.Controllers
             }
 
             var tweetIdsToDelete = allTweetsToDelete.Select(t => t.Id).ToList();
+
+            // Clear QuoteTweetId on any tweets that quote this tweet or its replies to prevent foreign key errors
+            var quotingTweets = await _context.Tweets
+                .Where(t => t.QuoteTweetId.HasValue && tweetIdsToDelete.Contains(t.QuoteTweetId.Value))
+                .ToListAsync();
+            foreach (var quotingTweet in quotingTweets)
+            {
+                quotingTweet.QuoteTweetId = null;
+            }
 
             // Remove files from storage
             foreach (var t in allTweetsToDelete)
@@ -459,6 +487,8 @@ namespace HayirsizlarApp.Controllers
                     .ThenInclude(p => p!.User)
                 .Include(t => t.Replies)
                     .ThenInclude(r => r.User)
+                .Include(t => t.QuoteTweet)
+                    .ThenInclude(q => q!.User)
                 .FirstOrDefaultAsync(t => t.Id == id);
 
             if (tweet == null)

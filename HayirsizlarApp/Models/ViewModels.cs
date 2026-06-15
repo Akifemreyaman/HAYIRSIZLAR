@@ -33,7 +33,9 @@ namespace HayirsizlarApp.Models
         public string DisplayName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Şifre zorunludur.")]
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "Şifre en az 6 karakter olmalıdır.")]
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "Şifre en az 8 karakter olmalıdır.")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", 
+            ErrorMessage = "Şifre en az bir büyük harf, bir küçük harf, bir rakam ve bir özel karakter içermelidir.")]
         [DataType(DataType.Password)]
         [Display(Name = "Şifre")]
         public string Password { get; set; } = string.Empty;
@@ -58,6 +60,8 @@ namespace HayirsizlarApp.Models
         public IFormFile? MediaFile { get; set; }
 
         public int? ParentTweetId { get; set; }
+
+        public int? QuoteTweetId { get; set; }
     }
 
     public class ChangeProfileViewModel
@@ -83,7 +87,9 @@ namespace HayirsizlarApp.Models
         [Display(Name = "Mevcut Şifre (Şifre değiştirmek için)")]
         public string? CurrentPassword { get; set; }
 
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "Yeni şifre en az 6 karakter olmalıdır.")]
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "Yeni şifre en az 8 karakter olmalıdır.")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", 
+            ErrorMessage = "Yeni şifre en az bir büyük harf, bir küçük harf, bir rakam ve bir özel karakter içermelidir.")]
         [DataType(DataType.Password)]
         [Display(Name = "Yeni Şifre")]
         public string? NewPassword { get; set; }

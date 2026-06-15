@@ -142,3 +142,8 @@ C:\Users\Akif\Desktop\HAYIRSIZLAR\HayirsizlarApp\obj\Release\net8.0\HayirsizlarA
 C:\Users\Akif\Desktop\HAYIRSIZLAR\HayirsizlarApp\obj\Release\net8.0\HayirsizlarApp.genruntimeconfig.cache
 C:\Users\Akif\Desktop\HAYIRSIZLAR\HayirsizlarApp\obj\Release\net8.0\ref\HayirsizlarApp.dll
 C:\Users\Akif\Desktop\HAYIRSIZLAR\HayirsizlarApp\obj\Release\net8.0\HayirsizlarApp.sourcelink.json
+C:\Users\Akif\Desktop\HAYIRSIZLAR\HayirsizlarApp\bin\Release\net8.0\Microsoft.AspNetCore.Cryptography.Internal.dll
+C:\Users\Akif\Desktop\HAYIRSIZLAR\HayirsizlarApp\bin\Release\net8.0\Microsoft.AspNetCore.DataProtection.dll
+C:\Users\Akif\Desktop\HAYIRSIZLAR\HayirsizlarApp\bin\Release\net8.0\Microsoft.AspNetCore.DataProtection.Abstractions.dll
+C:\Users\Akif\Desktop\HAYIRSIZLAR\HayirsizlarApp\bin\Release\net8.0\Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.dll
+C:\Users\Akif\Desktop\HAYIRSIZLAR\HayirsizlarApp\bin\Release\net8.0\System.Security.Cryptography.Xml.dll

@@ -97,7 +97,7 @@
                 </div>
             </div>
         }
-
+ 
         <!-- Text content -->
         <div class="tweet-content-container" id="tweet-content-container-@Model.Tweet.Id">
             @if (!string.IsNullOrEmpty(Model.Tweet.Content))
@@ -120,6 +120,24 @@
             }
         </div>
 
+        <!-- Quoted Tweet Box if any -->
+        @if (Model.Tweet.QuoteTweet != null)
+        {
+            <div class="quoted-tweet-box" style="border: 2px solid var(--dark-black); background-color: #fcfcfc; padding: 12px; margin: 15px 0 10px 0; box-shadow: 3px 3px 0px 0px var(--dark-black); font-size: 0.9rem;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-weight: 800;">
+                    <div class="tweet-avatar" style="width: 22px; height: 22px; font-size: 0.7rem; line-height: 22px; margin-right: 0; background-color: @(Model.Tweet.QuoteTweet.User?.AvatarColor ?? "#FFE600")">
+                        @(Model.Tweet.QuoteTweet.User?.DisplayName.Substring(0, Math.Min(2, Model.Tweet.QuoteTweet.User.DisplayName.Length)).ToUpper() ?? "??")
+                    </div>
+                    <span>@(Model.Tweet.QuoteTweet.User?.DisplayName ?? "Bilinmeyen Yazar")</span>
+                    <span style="color: #555; font-weight: 500;">@@@(Model.Tweet.QuoteTweet.User?.Username ?? "username")</span>
+                    <span style="margin-left: auto; font-size: 0.75rem; color: #666;">@Model.Tweet.QuoteTweet.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                </div>
+                <div class="quoted-content" style="font-style: italic; margin-left: 30px;">
+                    @Html.Raw(HayirsizlarApp.Helpers.MentionHelper.HighlightMentions(Model.Tweet.QuoteTweet.Content))
+                </div>
+            </div>
+        }
+ 
         <!-- Inline Edit form, hidden by default -->
         @if (Model.Tweet.UserId == Model.CurrentUser.Id)
         {
@@ -136,10 +154,13 @@
                 </form>
             </div>
         }
-
+ 
         <!-- Actions / Edit & Delete buttons -->
         <div class="tweet-footer">
-            <div class="tweet-footer-left">
+            <div class="tweet-footer-left" style="display: flex; gap: 10px;">
+                <a asp-action="Index" asp-route-quote="@Model.Tweet.Id" class="nav-btn btn-white" style="font-size: 0.75rem; padding: 6px 12px; box-shadow: 2px 2px 0px 0px var(--dark-black); text-decoration: none;">
+                    🔁 ALINTILA
+                </a>
                 @if (Model.Tweet.UserId == Model.CurrentUser.Id)
                 {
                     <button class="nav-btn btn-white" onclick="startEditTweet(@Model.Tweet.Id)" style="font-size: 0.75rem; padding: 6px 12px; box-shadow: 2px 2px 0px 0px var(--dark-black);">DÜZENLE</button>

@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "dg7F/bLEu+zZ/j1Olc57R55WgCvfS+dlVS//dTGRJTU=",
+  "Hash": "wzdYdu3Ij/qY9sz7BQIqZQh73NZVPl17XurRbsCs/94=",
   "Source": "HayirsizlarApp",
   "BasePath": "_content/HayirsizlarApp",
   "Mode": "Default",
@@ -1212,44 +1212,6 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\lib\\jquery\\LICENSE.txt"
-    },
-    {
-      "Identity": "C:\\Users\\Akif\\Desktop\\HAYIRSIZLAR\\HayirsizlarApp\\wwwroot\\uploads\\48a35c17-91d9-42f0-a6ba-8010e837e452.mp4",
-      "SourceId": "HayirsizlarApp",
-      "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\Akif\\Desktop\\HAYIRSIZLAR\\HayirsizlarApp\\wwwroot\\",
-      "BasePath": "_content/HayirsizlarApp",
-      "RelativePath": "uploads/48a35c17-91d9-42f0-a6ba-8010e837e452.mp4",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "AssetMergeBehavior": "PreferTarget",
-      "AssetMergeSource": "",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\uploads\\48a35c17-91d9-42f0-a6ba-8010e837e452.mp4"
-    },
-    {
-      "Identity": "C:\\Users\\Akif\\Desktop\\HAYIRSIZLAR\\HayirsizlarApp\\wwwroot\\uploads\\c16dd321-b215-4306-83d1-b40697b9c68d.png",
-      "SourceId": "HayirsizlarApp",
-      "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\Akif\\Desktop\\HAYIRSIZLAR\\HayirsizlarApp\\wwwroot\\",
-      "BasePath": "_content/HayirsizlarApp",
-      "RelativePath": "uploads/c16dd321-b215-4306-83d1-b40697b9c68d.png",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "AssetMergeBehavior": "PreferTarget",
-      "AssetMergeSource": "",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\uploads\\c16dd321-b215-4306-83d1-b40697b9c68d.png"
     }
   ]
 }

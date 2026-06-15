@@ -74,7 +74,7 @@ namespace HayirsizlarApp.Controllers
 
             await HttpContext.SignInAsync(principal, new AuthenticationProperties
             {
-                IsPersistent = true,
+                IsPersistent = model.RememberMe,
                 ExpiresUtc = model.RememberMe ? DateTimeOffset.UtcNow.AddDays(30) : DateTimeOffset.UtcNow.AddHours(2)
             });
 

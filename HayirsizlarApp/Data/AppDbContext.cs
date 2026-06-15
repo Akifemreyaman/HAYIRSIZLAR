@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using HayirsizlarApp.Models;
 
 namespace HayirsizlarApp.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : DbContext, IDataProtectionKeyContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -12,6 +13,7 @@ namespace HayirsizlarApp.Data
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Tweet> Tweets { get; set; } = null!;
         public DbSet<Notification> Notifications { get; set; } = null!;
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -48,6 +50,11 @@ namespace HayirsizlarApp.Data
                 entity.HasOne(t => t.ParentTweet)
                       .WithMany(t => t.Replies)
                       .HasForeignKey(t => t.ParentTweetId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(t => t.QuoteTweet)
+                      .WithMany()
+                      .HasForeignKey(t => t.QuoteTweetId)
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
