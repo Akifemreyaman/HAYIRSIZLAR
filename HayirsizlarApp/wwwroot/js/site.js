@@ -175,11 +175,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 5. Mention Autocomplete (WhatsApp Style)
     function initMentionAutocomplete() {
-        // Retrieve list of users serialized globally in Index.cshtml
-        const users = window.siteUsers || [];
-        if (users.length === 0) return;
+        const initializeTextarea = (textarea) => {
+            if (textarea.dataset.mentionInitialized) return;
+            textarea.dataset.mentionInitialized = "true";
+            setupAutocompleteForTextarea(textarea);
+        };
 
-        // Listen for focus on target textareas
+        // Initialize all textareas currently in the DOM
+        const textareas = document.querySelectorAll("textarea#NewTweet_Content, textarea.reply-textarea, textarea[name='NewTweet.Content'], textarea[name='content']");
+        textareas.forEach(initializeTextarea);
+
+        // Listen for focus on target textareas (for dynamically added or hidden ones)
         document.addEventListener("focusin", (e) => {
             if (e.target.tagName === "TEXTAREA" && (
                 e.target.id === "NewTweet_Content" || 
@@ -188,14 +194,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 e.target.name === "content"
             )) {
                 const textarea = e.target;
-                if (textarea.dataset.mentionInitialized) return;
-                textarea.dataset.mentionInitialized = "true";
-                setupAutocompleteForTextarea(textarea, users);
+                if (!textarea.dataset.mentionInitialized) {
+                    initializeTextarea(textarea);
+                    // Wrapping causes a temporary DOM removal, so refocus immediately
+                    textarea.focus();
+                }
             }
         });
     }
 
-    function setupAutocompleteForTextarea(textarea, users) {
+    function setupAutocompleteForTextarea(textarea) {
         // Create dropdown list container
         const dropdown = document.createElement("div");
         dropdown.className = "mention-dropdown";
@@ -272,6 +280,9 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         textarea.addEventListener("input", () => {
+            const users = window.siteUsers || [];
+            if (users.length === 0) return;
+
             const text = textarea.value;
             const cursorPos = textarea.selectionStart;
             const textBeforeCursor = text.substring(0, cursorPos);
@@ -300,6 +311,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         textarea.addEventListener("keydown", (e) => {
             if (dropdown.style.display === "block") {
+                const users = window.siteUsers || [];
+                if (users.length === 0) return;
+
                 const text = textarea.value;
                 const cursorPos = textarea.selectionStart;
                 const textBeforeCursor = text.substring(0, cursorPos);

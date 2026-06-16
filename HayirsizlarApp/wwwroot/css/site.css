@@ -173,6 +173,11 @@ main {
     }
 }
 
+.detail-layout {
+    width: 100%;
+    min-height: calc(100vh - 140px);
+}
+
 /* Authentication Page */
 .auth-container {
     max-width: 500px;
@@ -720,24 +725,6 @@ textarea.form-control {
     box-shadow: 1px 1px 0px 0px #ff4545;
 }
 
-/* Footer layout */
-.app-footer {
-    background-color: var(--white);
-    border-top: var(--border-width) solid var(--dark-black);
-    padding: 20px 40px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-.footer-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
 /* Alert styles */
 .alert-success-brutalist {
     background-color: #d2ffd2;
@@ -771,12 +758,6 @@ textarea.form-control {
 
     .header-container {
         padding: 15px 20px;
-    }
-
-    .footer-container {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
     }
 }
 
