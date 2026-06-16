@@ -640,6 +640,27 @@ namespace HayirsizlarApp.Controllers
 
             await _context.SaveChangesAsync();
 
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                var reactionTweet = await _context.Tweets
+                    .Include(t => t.Reactions)
+                    .FirstOrDefaultAsync(t => t.Id == id);
+                if (reactionTweet != null)
+                {
+                    var likes = reactionTweet.Reactions.Count(r => r.IsLike);
+                    var dislikes = reactionTweet.Reactions.Count(r => !r.IsLike);
+                    var userReaction = reactionTweet.Reactions.FirstOrDefault(r => r.UserId == userId);
+                    return Json(new { 
+                        success = true, 
+                        likes = likes, 
+                        dislikes = dislikes,
+                        hasLiked = userReaction != null && userReaction.IsLike,
+                        hasDisliked = userReaction != null && !userReaction.IsLike
+                    });
+                }
+                return Json(new { success = false });
+            }
+
             var referer = Request.Headers["Referer"].ToString();
             if (!string.IsNullOrEmpty(referer))
             {

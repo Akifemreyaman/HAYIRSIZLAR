@@ -353,5 +353,54 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // 6. Like/Dislike AJAX Handling
+    document.addEventListener("submit", (e) => {
+        const form = e.target;
+        const actionAttr = form.getAttribute("action") || "";
+        if (actionAttr.includes("React") || form.action.includes("/Home/React")) {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            
+            fetch(form.action, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the UI counts dynamically
+                    const container = form.closest("div");
+                    if (container) {
+                        const forms = container.querySelectorAll("form");
+                        forms.forEach(f => {
+                            const isLikeInput = f.querySelector("input[name='isLike']");
+                            if (isLikeInput) {
+                                const isLike = isLikeInput.value === "true";
+                                const button = f.querySelector("button");
+                                if (button) {
+                                    if (isLike) {
+                                        button.innerHTML = `👍 ${data.likes}`;
+                                        button.className = `nav-btn ${data.hasLiked ? 'btn-yellow' : 'btn-white'}`;
+                                    } else {
+                                        button.innerHTML = `👎 ${data.dislikes}`;
+                                        button.className = `nav-btn ${data.hasDisliked ? 'btn-yellow' : 'btn-white'}`;
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            })
+            .catch(err => {
+                console.error("Reaction error:", err);
+                form.submit(); // fallback
+            });
+        }
+    });
+
     initMentionAutocomplete();
 });
