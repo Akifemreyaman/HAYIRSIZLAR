@@ -181,7 +181,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Listen for focus on target textareas
         document.addEventListener("focusin", (e) => {
-            if (e.target.tagName === "TEXTAREA" && (e.target.id === "NewTweet_Content" || e.target.classList.contains("reply-textarea"))) {
+            if (e.target.tagName === "TEXTAREA" && (
+                e.target.id === "NewTweet_Content" || 
+                e.target.classList.contains("reply-textarea") || 
+                e.target.name === "NewTweet.Content" || 
+                e.target.name === "content"
+            )) {
                 const textarea = e.target;
                 if (textarea.dataset.mentionInitialized) return;
                 textarea.dataset.mentionInitialized = "true";

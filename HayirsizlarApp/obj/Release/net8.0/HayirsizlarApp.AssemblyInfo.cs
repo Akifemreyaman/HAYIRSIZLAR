@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HayirsizlarApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+90d98a06732d10ad3fb960f88b27352d08f0a9b0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e400bad3a55e945dfee647dc35c6176b62a866d0")]
 [assembly: System.Reflection.AssemblyProductAttribute("HayirsizlarApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HayirsizlarApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

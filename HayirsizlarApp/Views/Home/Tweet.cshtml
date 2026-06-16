@@ -157,10 +157,31 @@
  
         <!-- Actions / Edit & Delete buttons -->
         <div class="tweet-footer">
-            <div class="tweet-footer-left" style="display: flex; gap: 10px;">
+            <div class="tweet-footer-left" style="display: flex; gap: 10px; align-items: center;">
                 <a asp-action="Index" asp-route-quote="@Model.Tweet.Id" class="nav-btn btn-white" style="font-size: 0.75rem; padding: 6px 12px; box-shadow: 2px 2px 0px 0px var(--dark-black); text-decoration: none;">
                     🔁 ALINTILA
                 </a>
+                @{
+                    var likesCount = Model.Tweet.Reactions?.Count(r => r.IsLike) ?? 0;
+                    var dislikesCount = Model.Tweet.Reactions?.Count(r => !r.IsLike) ?? 0;
+                    var userReaction = Model.Tweet.Reactions?.FirstOrDefault(r => r.UserId == Model.CurrentUser.Id);
+                    var hasLiked = userReaction != null && userReaction.IsLike;
+                    var hasDisliked = userReaction != null && !userReaction.IsLike;
+                }
+                <form asp-action="React" method="post" style="display: inline;">
+                    <input type="hidden" name="id" value="@Model.Tweet.Id" />
+                    <input type="hidden" name="isLike" value="true" />
+                    <button type="submit" class="nav-btn @(hasLiked ? "btn-yellow" : "btn-white")" style="font-size: 0.75rem; padding: 6px 12px; box-shadow: 2px 2px 0px 0px var(--dark-black);">
+                        👍 @likesCount
+                    </button>
+                </form>
+                <form asp-action="React" method="post" style="display: inline;">
+                    <input type="hidden" name="id" value="@Model.Tweet.Id" />
+                    <input type="hidden" name="isLike" value="false" />
+                    <button type="submit" class="nav-btn @(hasDisliked ? "btn-yellow" : "btn-white")" style="font-size: 0.75rem; padding: 6px 12px; box-shadow: 2px 2px 0px 0px var(--dark-black);">
+                        👎 @dislikesCount
+                    </button>
+                </form>
                 @if (Model.Tweet.UserId == Model.CurrentUser.Id)
                 {
                     <button class="nav-btn btn-white" onclick="startEditTweet(@Model.Tweet.Id)" style="font-size: 0.75rem; padding: 6px 12px; box-shadow: 2px 2px 0px 0px var(--dark-black);">DÜZENLE</button>
@@ -309,7 +330,28 @@
                         }
 
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 2px solid var(--dark-black); padding-top: 10px;">
-                            <div>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                @{
+                                    var rLikesCount = reply.Reactions?.Count(r => r.IsLike) ?? 0;
+                                    var rDislikesCount = reply.Reactions?.Count(r => !r.IsLike) ?? 0;
+                                    var rUserReaction = reply.Reactions?.FirstOrDefault(r => r.UserId == Model.CurrentUser.Id);
+                                    var rHasLiked = rUserReaction != null && rUserReaction.IsLike;
+                                    var rHasDisliked = rUserReaction != null && !rUserReaction.IsLike;
+                                }
+                                <form asp-action="React" method="post" style="display: inline;">
+                                    <input type="hidden" name="id" value="@reply.Id" />
+                                    <input type="hidden" name="isLike" value="true" />
+                                    <button type="submit" class="nav-btn @(rHasLiked ? "btn-yellow" : "btn-white")" style="font-size: 0.65rem; padding: 4px 8px; box-shadow: 2px 2px 0px 0px var(--dark-black);">
+                                        👍 @rLikesCount
+                                    </button>
+                                </form>
+                                <form asp-action="React" method="post" style="display: inline;">
+                                    <input type="hidden" name="id" value="@reply.Id" />
+                                    <input type="hidden" name="isLike" value="false" />
+                                    <button type="submit" class="nav-btn @(rHasDisliked ? "btn-yellow" : "btn-white")" style="font-size: 0.65rem; padding: 4px 8px; box-shadow: 2px 2px 0px 0px var(--dark-black);">
+                                        👎 @rDislikesCount
+                                    </button>
+                                </form>
                                 @if (reply.UserId == Model.CurrentUser.Id)
                                 {
                                     <button class="nav-btn btn-white" onclick="startEditReply(@reply.Id)" style="font-size: 0.7rem; padding: 4px 8px; box-shadow: 2px 2px 0px 0px var(--dark-black);">DÜZENLE</button>
@@ -339,7 +381,7 @@
             <input type="hidden" name="NewTweet.ParentTweetId" value="@Model.Tweet.Id" />
             
             <div class="form-group" style="margin-bottom: 15px;">
-                <textarea name="NewTweet.Content" class="form-control" style="background-color: var(--white);" placeholder="Düşüncelerini buraya ekle... Metinsiz sadece görsel/video da yükleyebilirsiniz."></textarea>
+                <textarea name="NewTweet.Content" class="form-control reply-textarea" style="background-color: var(--white);" placeholder="Düşüncelerini buraya ekle... Metinsiz sadece görsel/video da yükleyebilirsiniz."></textarea>
             </div>
 
             <!-- Custom Upload Area -->

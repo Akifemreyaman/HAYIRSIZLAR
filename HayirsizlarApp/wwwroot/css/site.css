@@ -127,6 +127,12 @@ main {
     box-shadow: 3px 3px 0px 0px var(--dark-black);
     text-transform: uppercase;
     color: var(--dark-black);
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+    display: inline-block;
 }
 
 /* Main layouts */
@@ -149,8 +155,22 @@ main {
     flex: 0 0 60%;
     background-color: var(--gray-bg);
     padding: 40px;
-    overflow-y: auto;
-    max-height: calc(100vh - 140px);
+}
+
+@media (min-width: 993px) {
+    .dashboard-layout {
+        height: calc(100vh - 140px);
+        min-height: 0;
+        overflow: hidden;
+    }
+    .left-column {
+        max-height: 100%;
+        overflow-y: auto;
+    }
+    .right-column {
+        max-height: 100%;
+        overflow-y: auto;
+    }
 }
 
 /* Authentication Page */
@@ -344,6 +364,8 @@ textarea.form-control {
     font-size: 1.1rem;
     font-weight: 900;
     text-transform: uppercase;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 .explore-btn {
@@ -413,6 +435,8 @@ textarea.form-control {
     text-transform: uppercase;
     font-size: 1.05rem;
     line-height: 1.2;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 .tweet-username {
@@ -835,6 +859,8 @@ textarea.form-control {
     font-size: 0.95rem;
     text-transform: uppercase;
     line-height: 1.1;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 .reply-username {

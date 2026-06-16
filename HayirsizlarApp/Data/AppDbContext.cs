@@ -14,6 +14,7 @@ namespace HayirsizlarApp.Data
         public DbSet<Tweet> Tweets { get; set; } = null!;
         public DbSet<Notification> Notifications { get; set; } = null!;
         public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
+        public DbSet<TweetLikeDislike> TweetLikeDislikes { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -77,6 +78,23 @@ namespace HayirsizlarApp.Data
                 entity.HasOne(n => n.Tweet)
                       .WithMany()
                       .HasForeignKey(n => n.TweetId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Configure TweetLikeDislike entity
+            modelBuilder.Entity<TweetLikeDislike>(entity =>
+            {
+                entity.HasKey(r => r.Id);
+                entity.HasIndex(r => new { r.UserId, r.TweetId }).IsUnique();
+
+                entity.HasOne(r => r.Tweet)
+                      .WithMany(t => t.Reactions)
+                      .HasForeignKey(r => r.TweetId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(r => r.User)
+                      .WithMany()
+                      .HasForeignKey(r => r.UserId)
                       .OnDelete(DeleteBehavior.Restrict);
             });
         }

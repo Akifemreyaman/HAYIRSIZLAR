@@ -25,5 +25,6 @@ namespace HayirsizlarApp.Models
         public DateTime? EditedAt { get; set; }
         public int? QuoteTweetId { get; set; }
         public Tweet? QuoteTweet { get; set; }
+        public ICollection<TweetLikeDislike> Reactions { get; set; } = new List<TweetLikeDislike>();
     }
 }

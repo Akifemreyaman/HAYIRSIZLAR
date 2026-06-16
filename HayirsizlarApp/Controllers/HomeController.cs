@@ -63,6 +63,7 @@ namespace HayirsizlarApp.Controllers
                     .ThenInclude(r => r.User)
                 .Include(t => t.QuoteTweet)
                     .ThenInclude(q => q!.User)
+                .Include(t => t.Reactions)
                 .Where(t => t.ParentTweetId == null)
                 .OrderByDescending(t => t.CreatedAt);
 
@@ -121,6 +122,7 @@ namespace HayirsizlarApp.Controllers
                         .ThenInclude(r => r.User)
                     .Include(t => t.QuoteTweet)
                         .ThenInclude(q => q!.User)
+                    .Include(t => t.Reactions)
                     .Where(t => t.ParentTweetId == null)
                     .OrderByDescending(t => t.CreatedAt);
 
@@ -178,6 +180,7 @@ namespace HayirsizlarApp.Controllers
                             .ThenInclude(r => r.User)
                         .Include(t => t.QuoteTweet)
                             .ThenInclude(q => q!.User)
+                        .Include(t => t.Reactions)
                         .Where(t => t.ParentTweetId == null)
                         .OrderByDescending(t => t.CreatedAt);
 
@@ -487,8 +490,11 @@ namespace HayirsizlarApp.Controllers
                     .ThenInclude(p => p!.User)
                 .Include(t => t.Replies)
                     .ThenInclude(r => r.User)
+                .Include(t => t.Replies)
+                    .ThenInclude(r => r.Reactions)
                 .Include(t => t.QuoteTweet)
                     .ThenInclude(q => q!.User)
+                .Include(t => t.Reactions)
                 .FirstOrDefaultAsync(t => t.Id == id);
 
             if (tweet == null)
@@ -579,6 +585,57 @@ namespace HayirsizlarApp.Controllers
                         }
                     }
                 }
+            }
+
+            await _context.SaveChangesAsync();
+
+            var referer = Request.Headers["Referer"].ToString();
+            if (!string.IsNullOrEmpty(referer))
+            {
+                return Redirect(referer);
+            }
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> React(int id, bool isLike)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var tweet = await _context.Tweets.FindAsync(id);
+            if (tweet == null)
+            {
+                return NotFound();
+            }
+
+            var existingReaction = await _context.TweetLikeDislikes
+                .FirstOrDefaultAsync(r => r.TweetId == id && r.UserId == userId);
+
+            if (existingReaction != null)
+            {
+                if (existingReaction.IsLike == isLike)
+                {
+                    _context.TweetLikeDislikes.Remove(existingReaction);
+                }
+                else
+                {
+                    existingReaction.IsLike = isLike;
+                }
+            }
+            else
+            {
+                var newReaction = new TweetLikeDislike
+                {
+                    TweetId = id,
+                    UserId = userId,
+                    IsLike = isLike
+                };
+                _context.TweetLikeDislikes.Add(newReaction);
             }
 
             await _context.SaveChangesAsync();
