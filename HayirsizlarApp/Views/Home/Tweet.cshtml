@@ -157,7 +157,7 @@
  
         <!-- Actions / Edit & Delete buttons -->
         <div class="tweet-footer">
-            <div class="tweet-footer-left" style="display: flex; gap: 10px; align-items: center;">
+            <div class="tweet-footer-left">
                 <a asp-action="Index" asp-route-quote="@Model.Tweet.Id" class="nav-btn btn-white" style="font-size: 0.75rem; padding: 6px 12px; box-shadow: 2px 2px 0px 0px var(--dark-black); text-decoration: none;">
                     🔁 ALINTILA
                 </a>
@@ -329,8 +329,8 @@
                             </div>
                         }
 
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 2px solid var(--dark-black); padding-top: 10px;">
-                            <div style="display: flex; gap: 8px; align-items: center;">
+                        <div class="reply-footer">
+                            <div class="reply-footer-left">
                                 @{
                                     var rLikesCount = reply.Reactions?.Count(r => r.IsLike) ?? 0;
                                     var rDislikesCount = reply.Reactions?.Count(r => !r.IsLike) ?? 0;
@@ -361,7 +361,7 @@
                             {
                                 <form asp-action="DeleteTweet" method="post" onsubmit="return confirm('Bu cevabı silmek istediğinden emin misin?');">
                                     <input type="hidden" name="id" value="@reply.Id" />
-                                    <button type="submit" class="delete-reply-btn" style="padding: 4px 8px; font-size: 0.7rem; box-shadow: 2px 2px 0px 0px #ff4545;">SİL</button>
+                                    <button type="submit" class="delete-reply-btn">SİL</button>
                                 </form>
                             }
                         </div>

@@ -1137,3 +1137,112 @@ textarea.form-control {
     font-weight: 700;
     color: #555;
 }
+
+/* --- Mood Preset Buttons (Profile) --- */
+.mood-preset-btn {
+    background-color: var(--white);
+    color: var(--dark-black);
+    border: 2px solid var(--dark-black);
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 2px 2px 0px 0px var(--dark-black);
+    transition: transform 0.05s, box-shadow 0.05s;
+    text-transform: uppercase;
+}
+.mood-preset-btn:hover {
+    background-color: var(--primary-yellow);
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0px 0px var(--dark-black);
+}
+.mood-preset-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px 0px var(--dark-black);
+}
+
+/* --- Color Picker Wrap --- */
+.color-picker-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* --- Reply Footer Styles --- */
+.reply-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    border-top: 2px solid var(--dark-black);
+    padding-top: 10px;
+}
+.reply-footer-left {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* --- Mobile View Enhancements (Narrow screens) --- */
+@media (max-width: 576px) {
+    .left-column {
+        padding: 20px 15px;
+    }
+    .left-column h1 {
+        font-size: 2rem !important;
+    }
+    .right-column {
+        padding: 20px 10px;
+    }
+    .header-container {
+        padding: 12px 10px;
+    }
+    .brutalist-card {
+        padding: 20px 15px;
+    }
+    .tweet-card {
+        padding: 15px 12px;
+    }
+    .profile-info-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    /* Footer & Action Buttons wrapping to prevent overflow */
+    .tweet-footer, .reply-footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    .tweet-footer-left, .reply-footer-left {
+        flex-wrap: wrap;
+        gap: 6px !important;
+        justify-content: flex-start;
+    }
+    
+    /* Shrink footer action buttons on small screens */
+    .tweet-footer-left .nav-btn,
+    .reply-footer-left .nav-btn {
+        padding: 5px 8px !important;
+        font-size: 0.7rem !important;
+        box-shadow: 2px 2px 0px 0px var(--dark-black) !important;
+    }
+    .tweet-footer-left form,
+    .reply-footer-left form {
+        display: inline-block;
+    }
+    
+    .delete-tweet-btn,
+    .delete-reply-btn {
+        width: 100%;
+        text-align: center;
+        box-shadow: 2px 2px 0px 0px #ff4545 !important;
+        padding: 6px 12px !important;
+        font-size: 0.75rem !important;
+    }
+    
+    .media-display-container {
+        min-height: 180px;
+    }
+}

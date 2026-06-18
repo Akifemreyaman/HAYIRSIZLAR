@@ -232,7 +232,7 @@
 
                         <!-- Actions / Details, Edit & Delete buttons -->
                         <div class="tweet-footer">
-                            <div class="tweet-footer-left" style="display: flex; gap: 10px; align-items: center;">
+                            <div class="tweet-footer-left">
                                 <a asp-controller="Home" asp-action="Tweet" asp-route-id="@tweet.Id" class="nav-btn btn-white" style="font-size: 0.75rem; padding: 6px 12px; box-shadow: 2px 2px 0px 0px var(--dark-black); text-decoration: none;">
                                     💬 CEVAPLAR (@(tweet.Replies?.Count ?? 0))
                                 </a>
